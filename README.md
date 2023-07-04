@@ -1,1 +1,0 @@
-# blackpama.github.io
