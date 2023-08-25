@@ -4,9 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Link and YouTube Link Converter</title>
+    <title>Link Converter</title>
     <style>
-        body {
+        /* Your CSS styles here */
+
+        /* ... */
+                body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 0 20px; /* Equal margin from left and right */
@@ -38,10 +41,11 @@
             color: #007bff;
             text-decoration: none;
         }
+
     </style>
 </head>
 <body>
-    <h1>Link Converter</h1>
+    <h1> Link Converter</h1>
     <input type="text" id="linkInput" placeholder="Paste Repl.it or GitHub link" oninput="checkLink()">
     <button id="convertButton">Convert</button>
     <div id="outputLink"></div>
@@ -49,7 +53,7 @@
     <script>
         function checkLink() {
             const linkInput = document.getElementById('linkInput');
-            const youtubePattern = /(?:https?:\/\/)?(?:www\.)?youtube\.com\/(?:watch\?v=|shorts\/|live\/|embed\/|v\/)([^&?/]+)/i;
+            const youtubePattern = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/|embed\/|v\/)|youtu\.be\/)([^&?/]+)/i;
             const youtubeMatch = linkInput.value.match(youtubePattern);
 
             if (youtubeMatch) {
@@ -73,7 +77,7 @@
             const githubMatch = link.match(githubPattern);
 
             if (replitMatch) {
-                const placeholder = replitMatch[1];
+                              const placeholder = replitMatch[1];
                 let path = replitMatch[2];
                 const username = link.match(/https:\/\/replit\.com\/@([^/]+)/)[1];
                 if (path.endsWith("index.html")) {
@@ -83,8 +87,10 @@
                 const fullAlternateLink = "https://" + alternateLink.replace(/\?v=\d+/, "");
                 outputLinkContainer.innerHTML = `Converted Replit link: <a href="${fullAlternateLink}" target="_blank">${fullAlternateLink}</a>`;
                 linkInput.value = ''; // Clear the input field
+                // Your Replit link conversion code here
+                /* ... */
             } else if (githubMatch) {
-                const username = githubMatch[1];
+                              const username = githubMatch[1];
                 const repo = githubMatch[2];
                 let path = githubMatch[3];
                 if (path.endsWith("index.html")) {
@@ -97,6 +103,8 @@
                     outputLinkContainer.innerHTML = `Converted GitHub Link: <a href="${outputLink}" target="_blank">${outputLink}</a>`;
                 }
                 linkInput.value = ''; // Clear the input field
+                // Your GitHub link conversion code here
+                /* ... */
             } else {
                 outputLinkContainer.innerHTML = "Invalid link format.";
                 linkInput.value = ''; // Clear the input field
