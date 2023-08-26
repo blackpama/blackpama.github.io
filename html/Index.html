@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faster Syntax Highlighting</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/base16/humanoid-dark.min.css" integrity="sha512-VpzmzXvIXjYfKE4xjvTjF41gt15bbXf3u0CDWXDm105TA7yphqLSVqAc+gnpJswiS068uRYqiXCC4MvCycjQhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+    <style>
+    *{
+      margin: 0;
+      background: #000
+    }
+        .editor-container {
+            border: 0.1px dotted #ccc;
+            padding: 10px;
+            width: 80vw;
+            min-height: 60px; /* Changed to min-height */
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow: auto;
+            background: black;
+            color: white;
+            margin: auto;
+            line-height: 1.5;
+            
+            outline: none;
+        }
+
+        code {
+          line-height: 1.5;
+            white-space: pre;
+            overflow-wrap: normal;
+            word-break: normal;
+        }
+    </style>
+</head>
+<body>
+  <button class="copy-button" style="position: sticky; top: 50vh; left: 90vw; height: 25px; padding: 4px 8px; border: none; background-color: #007bff; color: #fff; cursor: pointer;" onclick="copyBodyText(this)">Copy combined code</button>
+  
+  <pre><code class="language-html" style="background: black;">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;UTF-8&quot;&gt;
+  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+  &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;ie=edge&quot;&gt;
+  &lt;title&gt;Document&lt;/title&gt;
+  &lt;style&gt;
+  <span> /* enter css */</span>
+</code></pre>
+    <div class="editor-container fakeTextarea" contenteditable="true" spellcheck="false"></div>
+<pre><code class="language-html" style="background: black;">&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+<span>&lt;!-- Enter html of body tag --&gt;</span>
+</code></pre>
+    <div class="editor-container fakeTextarea" contenteditable="true" spellcheck="false"></div>
+    <pre><code class="language-html" style="background: black;">&lt;script&gt;
+<span>//Enter javascript</span>
+</code></pre>
+    <div class="editor-container fakeTextarea" contenteditable="true" spellcheck="false"></div>
+  <pre><code class="language-html" style="background: black;">
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+    <script>
+        const fakeTextareas = document.querySelectorAll('.fakeTextarea');
+
+        // Highlight and format the code when the user finishes editing
+        fakeTextareas.forEach(textarea => {
+            textarea.addEventListener('input', () => {
+                clearTimeout(textarea.formatTimeout);
+                textarea.formatTimeout = setTimeout(() => formatAndHighlightCode(textarea), 500); // Delay for 500ms after the last input
+            });
+        });
+
+        function formatAndHighlightCode(textarea) {
+            const codeContent = textarea.innerText;
+            const formattedCode = formatSourceCode(codeContent);
+            textarea.innerHTML = `<code>${hljs.highlightAuto(formattedCode).value}</code>`;
+        }
+
+        function formatSourceCode(code) {
+            const tabSize = 2;
+            const lines = code.split('\n');
+            let formattedCode = '';
+            let indent = 0;
+
+            lines.forEach((line, index) => {
+                line = line.trim();
+
+                if (line.endsWith('}')) {
+                    indent -= tabSize;
+                }
+
+                formattedCode += ' '.repeat(indent) + line + '\n';
+
+                if (line.endsWith('{')) {
+                    indent += tabSize;
+                }
+            });
+
+            return formattedCode.trim();
+        }
+
+        // Call formatAndHighlightCode initially to apply formatting and syntax highlighting to any initial content in the textareas
+        fakeTextareas.forEach(textarea => formatAndHighlightCode(textarea));
+    </script>
+    <script>
+    hljs.highlightAll();
+</script>
+<script>
+    function copyBodyText(button) {
+      const bodyText = document.body.innerText;
+
+      const tempTextArea = document.createElement('textarea');
+      tempTextArea.value = bodyText;
+      document.body.appendChild(tempTextArea);
+
+      tempTextArea.select();
+      document.execCommand('copy');
+
+      document.body.removeChild(tempTextArea);
+
+      button.innerText = 'Copied!';
+      setTimeout(() => {
+        button.innerText = 'Copy Body Text';
+      }, 2000);
+    }
+  </script>
+  
+  
+  <!-- for hide button -->
+  
+  
+  <script>
+    function copyBodyText(button) {
+      button.style.display = 'none'; // Hide the button
+
+      const bodyText = document.body.innerText;
+
+      const tempTextArea = document.createElement('textarea');
+      tempTextArea.value = bodyText;
+      document.body.appendChild(tempTextArea);
+
+      tempTextArea.select();
+      document.execCommand('copy');
+
+      document.body.removeChild(tempTextArea);
+
+      setTimeout(() => {
+        button.style.display = 'inline-block'; // Show the button after 2 seconds
+        button.innerText = 'Copied!';
+        setTimeout(() => {
+          button.innerText = 'Copy combined code';
+        }, 2000);
+      }, 2);
+    }
+  </script>
+</body>
+</html>
