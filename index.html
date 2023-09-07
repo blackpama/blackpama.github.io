@@ -51,7 +51,7 @@
 
 <body>
     <h1>Link Converter</h1>
-    <input type="text" id="linkInput" placeholder="Paste Repl.it, GitHub, or YouTube link">
+    <input type="text" id="linkInput" placeholder="Paste Repl.it, GitHub, Google Drive, or YouTube link">
     <button id="convertButton">Convert</button>
     <div id="outputLink"></div>
 
@@ -152,13 +152,13 @@
             }
         }
 
-        // Add an event listener for the input field to detect changes
+        // Add event listeners for the input field to detect changes and pasted content
         document.getElementById("linkInput").addEventListener("input", function () {
             const linkInput = document.getElementById('linkInput');
             const link = linkInput.value;
 
-            // Automatically trigger the "Convert" button if a YouTube link is detected
-            if (link.includes("youtube.com") || link.includes("youtu.be")) {
+            // Automatically trigger the "Convert" button if a YouTube or Google Drive link is detected
+            if (link.includes("youtube.com") || link.includes("youtu.be") || link.includes("drive.google.com")) {
                 document.getElementById("convertButton").click();
             }
         });
