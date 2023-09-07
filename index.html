@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta charset="UTF-8">
+      <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Link Converter</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.10/clipboard.min.js"></script>
-    <style>
+    <title>Link Converter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
+        <style>
         /* Your CSS styles here */
 
         /* ... */
@@ -44,108 +46,132 @@
         }
 
     </style>
+
 </head>
+
 <body>
     <h1>Link Converter</h1>
-    <input type="text" id="linkInput" placeholder="Paste Repl.it, GitHub, or Google Drive link" oninput="checkLink()">
+    <input type="text" id="linkInput" placeholder="Paste Repl.it, GitHub, or YouTube link">
     <button id="convertButton">Convert</button>
     <div id="outputLink"></div>
 
-<script>
-    // Function to convert a Google Drive link to the desired format
-    function convertDriveLink(originalLink) {
-        const fileIdRegex = /\/d\/([^/]+)/;
-        const match = originalLink.match(fileIdRegex);
+    <script>
+        // Function to convert a Google Drive link to the desired format
+        function convertDriveLink(originalLink) {
+            const fileIdRegex = /\/d\/([^/]+)/;
+            const match = originalLink.match(fileIdRegex);
 
-        if (match) {
-            const fileId = match[1];
-            const directDownloadLink = `https://drive.google.com/uc?id=${fileId}&export=download`;
-            return directDownloadLink;
-        } else {
-            return "Invalid Google Drive link";
-        }
-    }
-
-    document.getElementById("convertButton").addEventListener("click", function () {
-        const linkInput = document.getElementById('linkInput');
-        const outputLinkContainer = document.getElementById('outputLink');
-
-        const link = linkInput.value;
-
-        if (link.includes("drive.google.com")) {
-            const driveText = convertDriveLink(link);
-            if (driveText === "Invalid Google Drive link") {
-                outputLinkContainer.innerHTML = "Invalid link";
+            if (match) {
+                const fileId = match[1];
+                const directDownloadLink = `https://drive.google.com/uc?id=${fileId}&export=download`;
+                return directDownloadLink;
             } else {
-                // Display the converted link on the webpage with blue text color
-                outputLinkContainer.innerHTML = `Converted Google Drive Link: <span id="driveLink" style="color: blue;">${driveText}</span>`;
-                const clipboard = new ClipboardJS('#driveLink', {
-                    text: function () {
-                        return driveText;
-                    }
-                });
-                clipboard.on('success', function (e) {
-                    // Clear the selection after copying
-                    e.clearSelection();
-                });
+                return "Invalid Google Drive link";
             }
-            linkInput.value = ''; // Clear the input field
-        } else {
-            const replitPattern = /https:\/\/replit\.com\/@[^/]+\/([^/]+)(?:\?.*)?#([^?]+)/;
-            const githubPattern = /github\.com\/([^/]+)\/([^/]+)\/blob\/main\/(.+)/i;
-            const youtubePattern = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/|embed\/|v\/)|youtu\.be\/)([^&?/]+)/i;
-            const replitMatch = link.match(replitPattern);
-            const githubMatch = link.match(githubPattern);
-            const youtubeMatch = link.match(youtubePattern);
+        }
 
-            if (replitMatch) {
-              const placeholder = replitMatch[1];
-                let path = replitMatch[2];
-                const username = link.match(/https:\/\/replit\.com\/@([^/]+)/)[1];
-                if (path.endsWith("index.html")) {
-                    path = path.substring(0, path.length - 10); // Remove "index.html"
-                }
-                const alternateLink = `${placeholder}.${username}.repl.co/${path}`;
-                const fullAlternateLink = "https://" + alternateLink.replace(/\?v=\d+/, "");
-                outputLinkContainer.innerHTML = `Converted Replit link: <a href="${fullAlternateLink}" target="_blank">${fullAlternateLink}</a>`;
-                linkInput.value = ''; // Clear the input field
-                // Your Replit link conversion code here
-                /* ... */
-                // ... (existing code for Replit link conversion)
-            } else if (githubMatch) {
-              const username = githubMatch[1];
-                const repo = githubMatch[2];
-                let path = githubMatch[3];
-                if (path.endsWith("index.html")) {
-                    path = path.substring(0, path.length - 10); // Remove "index.html"
-                }
-                if (repo.toLowerCase() === `${username}.github.io`) {
-                    outputLinkContainer.innerHTML = `Converted GitHub Link: <a href="https://${username}.github.io/${path}" target="_blank">https://${username}.github.io/${path}</a>`;
+        // Function to perform the link conversion
+        function convertLink(link) {
+            const linkInput = document.getElementById('linkInput');
+            const outputLinkContainer = document.getElementById('outputLink');
+
+            if (link.includes("drive.google.com")) {
+                // Handle Google Drive link conversion
+                const driveText = convertDriveLink(link);
+                if (driveText === "Invalid Google Drive link") {
+                    outputLinkContainer.innerHTML = "Invalid link";
                 } else {
-                    const outputLink = `https://${username}.github.io/${repo}/${path}`;
-                    outputLinkContainer.innerHTML = `Converted GitHub Link: <a href="${outputLink}" target="_blank">${outputLink}</a>`;
+                    // Display the converted link on the webpage with blue text color
+                    outputLinkContainer.innerHTML = `Converted Google Drive Link: <span id="driveLink" style="color: blue;">${driveText}</span>`;
+                    const clipboard = new ClipboardJS('#driveLink', {
+                        text: function () {
+                            return driveText;
+                        }
+                    });
+                    clipboard.on('success', function (e) {
+                        // Clear the selection after copying
+                        e.clearSelection();
+                    });
                 }
                 linkInput.value = ''; // Clear the input field
-                // Your GitHub link conversion code here
-                /* ... */
-                // ... (existing code for GitHub link conversion)
-            } else if (youtubeMatch) {
-                const videoId = youtubeMatch[1];
-                const videoLink = `https://ytload.com/en/download/${videoId}/mp4_18/`;
-                const audioLink = `https://ytload.com/en/download/${videoId}/mp3_128/`;
+            } else if (link.includes("youtube.com") || link.includes("youtu.be")) {
+                // Handle YouTube link conversion
+                const youtubePattern = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/|embed\/|v\/)|youtu\.be\/)([^&?/]+)/i;
+                const youtubeMatch = link.match(youtubePattern);
 
-                outputLinkContainer.innerHTML = `
-                    Video: <a href="${videoLink}" target="_blank">${videoLink}</a><br>
-                    Audio: <a href="${audioLink}" target="_blank">${audioLink}</a>
-                `;
-                linkInput.value = ''; // Clear the input field
+                if (youtubeMatch) {
+                    const videoId = youtubeMatch[1];
+                    const videoLink = `https://ytload.com/en/download/${videoId}/mp4_18/`;
+                    const audioLink = `https://ytload.com/en/download/${videoId}/mp3_128/`;
+
+                    outputLinkContainer.innerHTML = `
+                        Video: <a href="${videoLink}" target="_blank">${videoLink}</a><br>
+                        Audio: <a href="${audioLink}" target="_blank">${audioLink}</a>
+                    `;
+                    linkInput.value = ''; // Clear the input field
+                } else {
+                    outputLinkContainer.innerHTML = "Invalid YouTube link format.";
+                    linkInput.value = ''; // Clear the input field
+                }
             } else {
-                outputLinkContainer.innerHTML = "Invalid link format.";
-                linkInput.value = ''; // Clear the input field
+                // Handle Replit and GitHub link conversion
+                const replitPattern = /https:\/\/replit\.com\/@[^/]+\/([^/]+)(?:\?.*)?#([^?]+)/;
+                const githubPattern = /github\.com\/([^/]+)\/([^/]+)\/blob\/main\/(.+)/i;
+                const replitMatch = link.match(replitPattern);
+                const githubMatch = link.match(githubPattern);
+
+                if (replitMatch) {
+                    const placeholder = replitMatch[1];
+                    let path = replitMatch[2];
+                    const username = link.match(/https:\/\/replit\.com\/@([^/]+)/)[1];
+                    if (path.endsWith("index.html")) {
+                        path = path.substring(0, path.length - 10); // Remove "index.html"
+                    }
+                    const alternateLink = `${placeholder}.${username}.repl.co/${path}`;
+                    const fullAlternateLink = "https://" + alternateLink.replace(/\?v=\d+/, "");
+                    outputLinkContainer.innerHTML = `Converted Replit link: <a href="${fullAlternateLink}" target="_blank">${fullAlternateLink}</a>`;
+                    linkInput.value = ''; // Clear the input field
+                } else if (githubMatch) {
+                    const username = githubMatch[1];
+                    const repo = githubMatch[2];
+                    let path = githubMatch[3];
+                    if (path.endsWith("index.html")) {
+                        path = path.substring(0, path.length - 10); // Remove "index.html"
+                    }
+                    if (repo.toLowerCase() === `${username}.github.io`) {
+                        outputLinkContainer.innerHTML = `Converted GitHub Link: <a href="https://${username}.github.io/${path}" target="_blank">https://${username}.github.io/${path}</a>`;
+                    } else {
+                        const outputLink = `https://${username}.github.io/${repo}/${path}`;
+                        outputLinkContainer.innerHTML = `Converted GitHub Link: <a href="${outputLink}" target="_blank">${outputLink}</a>`;
+                    }
+                    linkInput.value = ''; // Clear the input field
+                } else {
+                    outputLinkContainer.innerHTML = "Invalid link format.";
+                    linkInput.value = ''; // Clear the input field
+                }
             }
         }
-    });
-</script>
+
+        // Add an event listener for the input field to detect changes
+        document.getElementById("linkInput").addEventListener("input", function () {
+            const linkInput = document.getElementById('linkInput');
+            const link = linkInput.value;
+
+            // Automatically trigger the "Convert" button if a YouTube link is detected
+            if (link.includes("youtube.com") || link.includes("youtu.be")) {
+                document.getElementById("convertButton").click();
+            }
+        });
+
+        // Add an event listener for the "Convert" button
+        document.getElementById("convertButton").addEventListener("click", function () {
+            const linkInput = document.getElementById('linkInput');
+            const link = linkInput.value;
+            convertLink(link);
+        });
+
+    </script>
 
 </body>
+
 </html>
