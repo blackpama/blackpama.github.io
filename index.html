@@ -1,18 +1,13 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-      <meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Link Converter</title>
-    <title>Link Converter</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
-        <style>
-        /* Your CSS styles here */
-
-        /* ... */
-                body {
+    <style>
+        body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 0 20px; /* Equal margin from left and right */
@@ -44,134 +39,201 @@
             color: #007bff;
             text-decoration: none;
         }
-
     </style>
-
 </head>
-
 <body>
-    <h1>Link Converter</h1>
-    <input type="text" id="linkInput" placeholder="Paste Repl.it, GitHub, Google Drive, or YouTube link">
-    <button id="convertButton">Convert</button>
-    <div id="outputLink"></div>
 
-    <script>
-        // Function to convert a Google Drive link to the desired format
-        function convertDriveLink(originalLink) {
-            const fileIdRegex = /\/d\/([^/]+)/;
-            const match = originalLink.match(fileIdRegex);
+<h1>Link Converter</h1>
+<input type="text" id="linkInput" placeholder="Paste Repl.it, GitHub, Google Drive, YouTube, or Instagram link">
+<button id="convertButton">Convert</button>
+<div id="outputLink"></div>
 
-            if (match) {
-                const fileId = match[1];
-                const directDownloadLink = `https://drive.google.com/uc?id=${fileId}&export=download`;
-                return directDownloadLink;
-            } else {
-                return "Invalid Google Drive link";
-            }
+<!-- JavaScript for converting Google Drive links -->
+<script>
+    // Function to convert a Google Drive link to the desired format
+    function convertDriveLink(originalLink) {
+        const fileIdRegex = /\/d\/([^/]+)/;
+        const match = originalLink.match(fileIdRegex);
+
+        if (match) {
+            const fileId = match[1];
+            const directDownloadLink = `https://drive.google.com/uc?id=${fileId}&export=download`;
+            return directDownloadLink;
+        } else {
+            return "Invalid Google Drive link";
         }
+    }
+</script>
 
-        // Function to perform the link conversion
-        function convertLink(link) {
-            const linkInput = document.getElementById('linkInput');
-            const outputLinkContainer = document.getElementById('outputLink');
+<!-- JavaScript for converting YouTube links -->
+<script>
+    // Function to convert a YouTube link to the desired format
+    function convertYouTubeLink(originalLink) {
+        const youtubePattern = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/|embed\/|v\/)|youtu\.be\/)([^&?/]+)/i;
+        const youtubeMatch = originalLink.match(youtubePattern);
 
-            if (link.includes("drive.google.com")) {
-                // Handle Google Drive link conversion
-                const driveText = convertDriveLink(link);
-                if (driveText === "Invalid Google Drive link") {
-                    outputLinkContainer.innerHTML = "Invalid link";
-                } else {
-                    // Display the converted link on the webpage with blue text color
-                    outputLinkContainer.innerHTML = `Converted Google Drive Link: <span id="driveLink" style="color: blue;">${driveText}</span>`;
-                    const clipboard = new ClipboardJS('#driveLink', {
-                        text: function () {
-                            return driveText;
-                        }
-                    });
-                    clipboard.on('success', function (e) {
-                        // Clear the selection after copying
-                        e.clearSelection();
-                    });
-                }
+        if (youtubeMatch) {
+            const videoId = youtubeMatch[1];
+            const videoLink = `https://ytload.com/en/download/${videoId}/mp4_18/`;
+            const audioLink = `https://ytload.com/en/download/${videoId}/mp3_128/`;
+
+            return { videoLink, audioLink };
+        } else {
+            return "Invalid YouTube link format";
+        }
+    }
+</script>
+
+<!-- JavaScript for Replit and GitHub link conversions -->
+<script>
+    // Function to handle Replit and GitHub link conversions
+    function handleReplitAndGitHubLink(link) {
+        const replitPattern = /https:\/\/replit\.com\/@[^/]+\/([^/]+)(?:\?.*)?#([^?]+)/;
+        const githubPattern = /github\.com\/([^/]+)\/([^/]+)\/blob\/main\/(.+)/i;
+        const replitMatch = link.match(replitPattern);
+        const githubMatch = link.match(githubPattern);
+
+        if (replitMatch) {
+            const placeholder = replitMatch[1];
+            let path = replitMatch[2];
+            const username = link.match(/https:\/\/replit\.com\/@([^/]+)/)[1];
+            if (path.endsWith("index.html")) {
+                path = path.substring(0, path.length - 10); // Remove "index.html"
+            }
+            const alternateLink = `${placeholder}.${username}.repl.co/${path}`;
+            const fullAlternateLink = "https://" + alternateLink.replace(/\?v=\d+/, "");
+            return fullAlternateLink;
+        } else if (githubMatch) {
+            const username = githubMatch[1];
+            const repo = githubMatch[2];
+            let path = githubMatch[3];
+            if (path.endsWith("index.html")) {
+                path = path.substring(0, path.length - 10); // Remove "index.html"
+            }
+            if (repo.toLowerCase() === `${username}.github.io`) {
+                return `https://${username}.github.io/${path}`;
+            } else {
+                return `https://${username}.github.io/${repo}/${path}`;
+            }
+        } else {
+            return "Invalid link format";
+        }
+    }
+</script>
+
+<!-- JavaScript for converting Instagram links -->
+<script>
+    // Function to convert an Instagram link to isave.cc format
+    function convertInstagramLinkToIsavecc(link) {
+        const parts = link.split('/');
+        const instaId = parts[parts.length - 2];
+        const isaveccLink = `https://www.isave.cc/m/${instaId}`;
+        return isaveccLink;
+    }
+</script>
+
+<!-- JavaScript for link conversion and automatic actions -->
+<script>
+    // Function to perform the link conversion
+    function convertLink(link) {
+        const linkInput = document.getElementById('linkInput');
+        const outputLinkContainer = document.getElementById('outputLink');
+
+        // Check if the link is a Google Drive link
+        if (link.includes("drive.google.com")) {
+            const driveText = convertDriveLink(link);
+            if (driveText === "Invalid Google Drive link") {
+                                outputLinkContainer.innerHTML = "Invalid link";
+            } else {
+                outputLinkContainer.innerHTML = `Converted Google Drive Link: <span id="driveLink" style="color: blue;">${driveText}</span>`;
+                const clipboard = new ClipboardJS('#driveLink', {
+                    text: function () {
+                        return driveText;
+                    }
+                });
+                clipboard.on('success', function (e) {
+                    // Clear the selection after copying
+                    e.clearSelection();
+                });
                 linkInput.value = ''; // Clear the input field
-            } else if (link.includes("youtube.com") || link.includes("youtu.be")) {
-                // Handle YouTube link conversion
-                const youtubePattern = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/|embed\/|v\/)|youtu\.be\/)([^&?/]+)/i;
-                const youtubeMatch = link.match(youtubePattern);
-
-                if (youtubeMatch) {
-                    const videoId = youtubeMatch[1];
-                    const videoLink = `https://ytload.com/en/download/${videoId}/mp4_18/`;
-                    const audioLink = `https://ytload.com/en/download/${videoId}/mp3_128/`;
-
-                    outputLinkContainer.innerHTML = `
-                        Video: <a href="${videoLink}" target="_blank">${videoLink}</a><br>
-                        Audio: <a href="${audioLink}" target="_blank">${audioLink}</a>
-                    `;
-                    linkInput.value = ''; // Clear the input field
-                } else {
-                    outputLinkContainer.innerHTML = "Invalid YouTube link format.";
-                    linkInput.value = ''; // Clear the input field
-                }
-            } else {
-                // Handle Replit and GitHub link conversion
-                const replitPattern = /https:\/\/replit\.com\/@[^/]+\/([^/]+)(?:\?.*)?#([^?]+)/;
-                const githubPattern = /github\.com\/([^/]+)\/([^/]+)\/blob\/main\/(.+)/i;
-                const replitMatch = link.match(replitPattern);
-                const githubMatch = link.match(githubPattern);
-
-                if (replitMatch) {
-                    const placeholder = replitMatch[1];
-                    let path = replitMatch[2];
-                    const username = link.match(/https:\/\/replit\.com\/@([^/]+)/)[1];
-                    if (path.endsWith("index.html")) {
-                        path = path.substring(0, path.length - 10); // Remove "index.html"
-                    }
-                    const alternateLink = `${placeholder}.${username}.repl.co/${path}`;
-                    const fullAlternateLink = "https://" + alternateLink.replace(/\?v=\d+/, "");
-                    outputLinkContainer.innerHTML = `Converted Replit link: <a href="${fullAlternateLink}" target="_blank">${fullAlternateLink}</a>`;
-                    linkInput.value = ''; // Clear the input field
-                } else if (githubMatch) {
-                    const username = githubMatch[1];
-                    const repo = githubMatch[2];
-                    let path = githubMatch[3];
-                    if (path.endsWith("index.html")) {
-                        path = path.substring(0, path.length - 10); // Remove "index.html"
-                    }
-                    if (repo.toLowerCase() === `${username}.github.io`) {
-                        outputLinkContainer.innerHTML = `Converted GitHub Link: <a href="https://${username}.github.io/${path}" target="_blank">https://${username}.github.io/${path}</a>`;
-                    } else {
-                        const outputLink = `https://${username}.github.io/${repo}/${path}`;
-                        outputLinkContainer.innerHTML = `Converted GitHub Link: <a href="${outputLink}" target="_blank">${outputLink}</a>`;
-                    }
-                    linkInput.value = ''; // Clear the input field
-                } else {
-                    outputLinkContainer.innerHTML = "Invalid link format.";
-                    linkInput.value = ''; // Clear the input field
-                }
             }
         }
 
-        // Add event listeners for the input field to detect changes and pasted content
-        document.getElementById("linkInput").addEventListener("input", function () {
-            const linkInput = document.getElementById('linkInput');
-            const link = linkInput.value;
-
-            // Automatically trigger the "Convert" button if a YouTube or Google Drive link is detected
-            if (link.includes("youtube.com") || link.includes("youtu.be") || link.includes("drive.google.com")) {
-                document.getElementById("convertButton").click();
+        // Check if the link is a YouTube link
+        else if (link.includes("youtube.com") || link.includes("youtu.be")) {
+            const youtubeLinks = convertYouTubeLink(link);
+            if (youtubeLinks === "Invalid YouTube link format") {
+                outputLinkContainer.innerHTML = "Invalid link format";
+            } else {
+                outputLinkContainer.innerHTML = `
+                    Video: <a href="${youtubeLinks.videoLink}" target="_blank">${youtubeLinks.videoLink}</a><br>
+                    Audio: <a href="${youtubeLinks.audioLink}" target="_blank">${youtubeLinks.audioLink}</a>
+                `;
+                linkInput.value = ''; // Clear the input field
             }
-        });
+        }
 
-        // Add an event listener for the "Convert" button
-        document.getElementById("convertButton").addEventListener("click", function () {
-            const linkInput = document.getElementById('linkInput');
-            const link = linkInput.value;
+        // Handle Replit and GitHub links
+        else {
+            const convertedLink = handleReplitAndGitHubLink(link);
+            if (convertedLink === "Invalid link format") {
+                outputLinkContainer.innerHTML = "Invalid link format";
+            } else {
+                outputLinkContainer.innerHTML = `Converted Link: <a href="${convertedLink}" target="_blank">${convertedLink}</a>`;
+                linkInput.value = ''; // Clear the input field
+            }
+        }
+    }
+
+    // Add event listener for pasted content in the input field
+    document.getElementById("linkInput").addEventListener("input", function () {
+        const linkInput = document.getElementById('linkInput');
+        const link = linkInput.value;
+
+        // Automatically trigger the conversion for Google Drive and YouTube links
+        if (link.includes("drive.google.com")) {
             convertLink(link);
-        });
+        } else if (link.includes("youtube.com") || link.includes("youtu.be")) {
+            convertLink(link);
+        }
 
-    </script>
+        // Check if the link is an Instagram link
+        if (link.includes("instagram.com")) {
+            const isaveccLink = convertInstagramLinkToIsavecc(link);
+            if (isaveccLink) {
+                // Open the isave.cc link in a new tab
+                window.open(isaveccLink, '_blank');
+                linkInput.value = ''; // Clear the input field
+            } else {
+                outputLinkContainer.innerHTML = "Invalid Instagram link.";
+            }
+        }
+    });
+
+    // Add an event listener for the "Convert" button
+    document.getElementById("convertButton").addEventListener("click", function () {
+        const linkInput = document.getElementById('linkInput');
+        const link = linkInput.value;
+        convertLink(link);
+    });
+</script>
+<!-- JavaScript to clear input field on "Convert" button click -->
+<script>
+    document.getElementById("convertButton").addEventListener("click", function () {
+        const linkInput = document.getElementById('linkInput');
+        const outputLinkContainer = document.getElementById('outputLink');
+        const link = linkInput.value;
+
+        // Add your existing code for different link conversions here
+        // ...
+
+        // Check if the link is invalid or unsupported
+        if (outputLinkContainer.innerHTML.includes("Invalid") || outputLinkContainer.innerHTML.includes("Unsupported")) {
+            linkInput.value = ''; // Clear the input field
+        }
+    });
+</script>
 
 </body>
-
 </html>
+
